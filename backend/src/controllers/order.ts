@@ -320,6 +320,10 @@ export const createOrder = async (
         const userId = res.locals.user._id
         const { address, payment, phone, total, email, items, comment } =
             req.body
+        
+         if (phone.length > 20) {
+            throw new BadRequestError('Телефон слишком длинный')
+        }    
 
         items.forEach((id: Types.ObjectId) => {
             const product = products.find((p) => p._id.equals(id))
@@ -349,10 +353,6 @@ export const createOrder = async (
             allowedTags: [],
             allowedAttributes: {},
         })
-
-        if (phone.length > 20) {
-            throw new BadRequestError('Телефон слишком длинный')
-        }
 
         const safePhone = sanitizeHtml(phone || '', {
             allowedTags: [],
