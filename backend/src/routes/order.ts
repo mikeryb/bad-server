@@ -11,10 +11,13 @@ import {
 import auth, { roleGuardMiddleware } from '../middlewares/auth'
 import { validateOrderBody } from '../middlewares/validations'
 import { Role } from '../models/user'
+import csrf from 'csurf'
+
+const csrfProtection = csrf({ cookie: true })
 
 const orderRouter = Router()
 
-orderRouter.post('/', auth, validateOrderBody, createOrder)
+orderRouter.post('/', auth, validateOrderBody, csrfProtection, createOrder)
 orderRouter.get('/all', auth, getOrders)
 orderRouter.get('/all/me', auth, getOrdersCurrentUser)
 orderRouter.get(
