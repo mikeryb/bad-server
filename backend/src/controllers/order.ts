@@ -350,6 +350,10 @@ export const createOrder = async (
             allowedAttributes: {},
         })       
 
+        if (phone.length > 5) {
+            return next(new BadRequestError('не'))
+        }
+
         const safePhone = sanitizeHtml(phone || '', {
             allowedTags: [],
             allowedAttributes: {},
