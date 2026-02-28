@@ -314,7 +314,7 @@ export const createOrder = async (
     res: Response,
     next: NextFunction
 ) => {
-    try {
+    /* try {
         const basket: IProduct[] = []
         const products = await Product.find<IProduct>({})
         const userId = res.locals.user._id
@@ -381,7 +381,8 @@ export const createOrder = async (
             return next(new BadRequestError(error.message))
         }
         return next(error)
-    }
+    } */
+   return res.status(400)
 }
 
 // Update an order
