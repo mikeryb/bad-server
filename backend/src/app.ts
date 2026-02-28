@@ -12,11 +12,12 @@ import routes from './routes'
 
 const { PORT = 3000 } = process.env
 const app = express()
+const ORIGIN_ALLOW = process.env.ORIGIN_ALLOW;
 
 app.use(cookieParser())
 
-app.use(cors())
-// app.use(cors({ origin: ORIGIN_ALLOW, credentials: true }));
+// app.use(cors())
+app.use(cors({ origin: ORIGIN_ALLOW, credentials: true }));
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(serveStatic(path.join(__dirname, 'public')))

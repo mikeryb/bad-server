@@ -5,16 +5,19 @@ import { join } from 'path'
 import BadRequestError from '../errors/bad-request-error'
 import ConflictError from '../errors/conflict-error'
 import NotFoundError from '../errors/not-found-error'
-import Product from '../models/product'
+import Product, { IProduct } from '../models/product'
 import movingFile from '../utils/movingFile'
 
 // GET /product
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { page = 1, limit = 5 } = req.query
+        const pageNum = Math.max(1, Number(page) || 1)
+        const limitNum = Math.min(50, Math.max(1, Number(limit) || 5))
+
         const options = {
-            skip: (Number(page) - 1) * Number(limit),
-            limit: Number(limit),
+            skip: (pageNum - 1) * limitNum,
+            limit: limitNum,
         }
         const products = await Product.find({}, null, options)
         const totalProducts = await Product.countDocuments({})
@@ -24,8 +27,8 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
             pagination: {
                 totalProducts,
                 totalPages,
-                currentPage: Number(page),
-                pageSize: Number(limit),
+                currentPage: pageNum,
+                pageSize: limitNum,
             },
         })
     } catch (err) {
@@ -42,6 +45,23 @@ const createProduct = async (
     try {
         const { description, category, price, title, image } = req.body
 
+        const safeTitle = sanitizeHtml(title, {
+            allowedTags: [],
+            allowedAttributes: {},
+        })
+        const safeDescription = sanitizeHtml(description, {
+            allowedTags: [],
+            allowedAttributes: {},
+        })
+        const safeCategory = sanitizeHtml(category, {
+            allowedTags: [],
+            allowedAttributes: {},
+        })
+        const safePrice = Number(price)
+        if (isNaN(safePrice) || safePrice < 0) {
+            throw new BadRequestError('Неверное значение price')
+        }
+
         // Переносим картинку из временной папки
         if (image) {
             movingFile(
@@ -52,11 +72,11 @@ const createProduct = async (
         }
 
         const product = await Product.create({
-            description,
+            description: safeDescription,
             image,
-            category,
-            price,
-            title,
+            category: safeCategory,
+            price: safePrice,
+            title: safeTitle,
         })
         return res.status(constants.HTTP_STATUS_CREATED).send(product)
     } catch (error) {
@@ -81,7 +101,35 @@ const updateProduct = async (
 ) => {
     try {
         const { productId } = req.params
-        const { image } = req.body
+        const { title, description, category, price, image } = req.body
+        const updateData: Partial<IProduct> = {}
+        if (title)
+            updateData.title = String(
+                sanitizeHtml(title, { allowedTags: [], allowedAttributes: {} })
+            )
+        if (description)
+            updateData.description = String(
+                sanitizeHtml(description, {
+                    allowedTags: [],
+                    allowedAttributes: {},
+                })
+            )
+        if (category)
+            updateData.category = String(
+                sanitizeHtml(category, {
+                    allowedTags: [],
+                    allowedAttributes: {},
+                })
+            )
+
+        if (price !== undefined) {
+            const safePrice = Number(price)
+            if (isNaN(safePrice) || safePrice < 0)
+                throw new BadRequestError('Неверное значение price')
+            updateData.price = safePrice
+        }
+
+        if (image) updateData.image = image
 
         // Переносим картинку из временной папки
         if (image) {
@@ -92,17 +140,10 @@ const updateProduct = async (
             )
         }
 
-        const product = await Product.findByIdAndUpdate(
-            productId,
-            {
-                $set: {
-                    ...req.body,
-                    price: req.body.price ? req.body.price : null,
-                    image: req.body.image ? req.body.image : undefined,
-                },
-            },
-            { runValidators: true, new: true }
-        ).orFail(() => new NotFoundError('Нет товара по заданному id'))
+        const product = await Product.findByIdAndUpdate(productId, updateData, {
+            runValidators: true,
+            new: true,
+        }).orFail(() => new NotFoundError('Нет товара по заданному id'))
         return res.send(product)
     } catch (error) {
         if (error instanceof MongooseError.ValidationError) {
@@ -142,3 +183,9 @@ const deleteProduct = async (
 }
 
 export { createProduct, deleteProduct, getProducts, updateProduct }
+function sanitizeHtml(
+    title: any,
+    arg1: { allowedTags: never[]; allowedAttributes: {} }
+) {
+    throw new Error('Function not implemented.')
+}
