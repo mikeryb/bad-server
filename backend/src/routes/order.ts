@@ -17,9 +17,9 @@ const csrfProtection = csrf({ cookie: true })
 
 const orderRouter = Router()
 
-orderRouter.post('/', auth, validateOrderBody, createOrder)
+orderRouter.post('/', auth, csrfProtection, validateOrderBody, createOrder)
 orderRouter.get('/all', auth, getOrders)
-orderRouter.get('/all/me', auth, getOrdersCurrentUser)
+orderRouter.get('/all/me', auth, csrfProtection, getOrdersCurrentUser)
 orderRouter.get(
     '/:orderNumber',
     auth,
