@@ -348,6 +348,11 @@ export const createOrder = async (
             allowedTags: [],
             allowedAttributes: {},
         })
+
+        if (phone.length > 20) {
+            throw new BadRequestError('Телефон слишком длинный')
+        }
+
         const safePhone = sanitizeHtml(phone || '', {
             allowedTags: [],
             allowedAttributes: {},
