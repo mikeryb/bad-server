@@ -17,7 +17,7 @@ const authRouter = Router()
 
 authRouter.get('/user', auth, getCurrentUser)
 authRouter.get('/csrf-token', csrfProtection, (req, res) => {
-    res.send(req.csrfToken())
+  res.json({ csrfToken: req.csrfToken() })
 })
 authRouter.patch('/me', auth, csrfProtection, updateCurrentUser)
 authRouter.get('/user/roles', auth, getCurrentUserRoles)
