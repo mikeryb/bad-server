@@ -8,7 +8,7 @@ import customerRouter from './customers'
 import orderRouter from './order'
 import productRouter from './product'
 import uploadRouter from './upload'
-import { Role } from 'models/user'
+import { Role } from '../models/user'
 
 const router = Router()
 
