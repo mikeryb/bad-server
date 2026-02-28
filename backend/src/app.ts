@@ -16,7 +16,6 @@ const { PORT = 3000 } = process.env
 const app = express()
 const ORIGIN_ALLOW = process.env.ORIGIN_ALLOW;
 
-console.log(ORIGIN_ALLOW)
 
 app.use(cookieParser())
 
@@ -27,11 +26,11 @@ app.use(cors({ origin: ORIGIN_ALLOW, credentials: true }));
 app.use(serveStatic(path.join(__dirname, 'public')))
 
 app.use(urlencoded({ extended: true }))
-app.use(json({ limit: '100kb' }))
+app.use(json({ limit: '1mb' }))
 
 app.use(rateLimit({
   windowMs: 60 * 1000,
-  max: 30,
+  max: 50,
 }))
 
 app.options('*', cors({
