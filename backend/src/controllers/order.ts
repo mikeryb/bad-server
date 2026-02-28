@@ -341,16 +341,16 @@ export const createOrder = async (
             allowedAttributes: {},
         })
 
-        const safeAddress = sanitizeHtml(address || '', {
+        /* const safeAddress = sanitizeHtml(address || '', {
             allowedTags: [],
             allowedAttributes: {},
         })
         const safeEmail = sanitizeHtml(email || '', {
             allowedTags: [],
             allowedAttributes: {},
-        })       
+        })  */      
 
-        if (phone.length > 5) {
+        if (phone.length > 20) {
             return next(new BadRequestError('не'))
         }
 
@@ -364,10 +364,10 @@ export const createOrder = async (
             products: items,
             payment,
             phone: safePhone,
-            email: safeEmail,
+            email: email,
             comment: safeComment,
             customer: userId,
-            deliveryAddress: safeAddress,
+            deliveryAddress: address,
         })
         const populateOrder = await newOrder.populate(['customer', 'products'])
         await populateOrder.save()
