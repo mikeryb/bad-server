@@ -33,10 +33,10 @@ export const getOrders = async (
         const allowedStatuses = Object.values(StatusType)
 
         if (status) {
-            if (
-                typeof status === 'string' &&
-                allowedStatuses.includes(status as StatusType)
-            ) {
+            if (status && !allowedStatuses.includes(status as StatusType)) {
+                throw new BadRequestError('Invalid status')
+            }
+            if (typeof status === 'string') {
                 filters.status = status
             }
         }
@@ -134,7 +134,7 @@ export const getOrders = async (
         }
 
         const pageNum = Math.max(1, Number(page) || 1)
-        const limitNum = Math.min(50, Math.max(1, Number(limit) || 10))
+        const limitNum = Math.min(10, Math.max(1, Number(limit) || 10))
 
         aggregatePipeline.push(
             { $sort: sort },
