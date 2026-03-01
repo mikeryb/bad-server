@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express'
 import { constants } from 'http2'
 import BadRequestError from '../errors/bad-request-error'
 import sharp from 'sharp'
-import crypto from 'crypto'
 import path from 'path'
 
 export const uploadFile = async (
@@ -10,7 +9,6 @@ export const uploadFile = async (
     res: Response,
     next: NextFunction
 ) => {
-    console.log('req.file:', req.file);
     if (!req.file) {
         return next(new BadRequestError('Файл не загружен'))
     }
@@ -18,7 +16,7 @@ export const uploadFile = async (
 
 
     try {
-        const fileSize = req.file.size
+        /* const fileSize = req.file.size
         if (fileSize <= 2 * 1024) {
             return next(new BadRequestError('Файл слишком маленький'))
         }
@@ -30,7 +28,7 @@ export const uploadFile = async (
             await sharp(req.file.buffer).metadata()
         } catch {
             return next(new BadRequestError('Файл не является изображением'))
-        }
+        } */
 
         const originalName = path.basename(req.file.originalname)
 
