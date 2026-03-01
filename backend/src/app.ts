@@ -1,5 +1,6 @@
 import { errors } from 'celebrate'
 import cookieParser from 'cookie-parser'
+import rateLimit from 'express-rate-limit'
 import cors from 'cors'
 import 'dotenv/config'
 import express, { json, urlencoded } from 'express'
@@ -9,12 +10,12 @@ import { DB_ADDRESS } from './config'
 import errorHandler from './middlewares/error-handler'
 import serveStatic from './middlewares/serverStatic'
 import routes from './routes'
-import rateLimit from 'express-rate-limit'
+
 
 
 const { PORT = 3000 } = process.env
 const app = express()
-const ORIGIN_ALLOW = process.env.ORIGIN_ALLOW;
+const { ORIGIN_ALLOW } = process.env;
 
 app.use(cookieParser())
 

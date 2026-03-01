@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { NextFunction, Request, Response } from 'express'
+import sanitizeHtml from 'sanitize-html'
 import { constants } from 'http2'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { Error as MongooseError } from 'mongoose'
@@ -9,7 +10,7 @@ import ConflictError from '../errors/conflict-error'
 import NotFoundError from '../errors/not-found-error'
 import UnauthorizedError from '../errors/unauthorized-error'
 import User from '../models/user'
-import sanitizeHtml from 'sanitize-html'
+
 
 // POST /auth/login
 const login = async (req: Request, res: Response, next: NextFunction) => {

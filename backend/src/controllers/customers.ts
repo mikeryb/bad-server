@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express'
+import sanitizeHtml from 'sanitize-html'
 import { FilterQuery } from 'mongoose'
 import NotFoundError from '../errors/not-found-error'
 import Order from '../models/order'
 import User, { IUser } from '../models/user'
-import sanitizeHtml from 'sanitize-html'
+
 
 // TODO: Добавить guard admin
 // eslint-disable-next-line max-len
@@ -129,7 +130,7 @@ export const getCustomers = async (
         ) {
             sort[sortField as string] = sortOrder === 'desc' ? -1 : 1
         } else {
-            sort['createdAt'] = -1
+            sort.createdAt = -1
         }
 
         const pageNum = Math.max(Number(page) || 1, 1)
