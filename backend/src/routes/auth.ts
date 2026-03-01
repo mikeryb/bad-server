@@ -17,7 +17,7 @@ const csrfProtection = csrf({ cookie: true })
 const authRouter = Router()
 
 authRouter.get('/user', auth, getCurrentUser)
-authRouter.get('/csrf-token', auth, csrfProtection, (req, res) => {
+authRouter.get('/csrf-token', csrfProtection, (req, res) => {
   res.json({ csrfToken: req.csrfToken() })
 })
 authRouter.patch('/me', auth, csrfProtection, updateCurrentUser)
