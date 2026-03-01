@@ -40,8 +40,8 @@ export const uploadFile = async (
             : `/${randomName}${ext}`
 
         return res.status(constants.HTTP_STATUS_CREATED).json({
-            fileName/* ,
-            originalName: originalName, */
+            fileName,
+            originalName: originalName,
         })
     } catch (error) {
         return next(error)
