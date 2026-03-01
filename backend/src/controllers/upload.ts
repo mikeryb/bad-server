@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { constants } from 'http2'
+import sharp from 'sharp'
+import path from 'path'
 import BadRequestError from '../errors/bad-request-error'
 
 export const uploadFile = async (
@@ -10,13 +12,30 @@ export const uploadFile = async (
     if (!req.file) {
         return next(new BadRequestError('Файл не загружен'))
     }
+
+
+
     try {
-        const fileName = process.env.UPLOAD_PATH
-            ? `/${process.env.UPLOAD_PATH}/${req.file.filename}`
-            : `/${req.file?.filename}`
-        return res.status(constants.HTTP_STATUS_CREATED).send({
+        const fileSize = req.file.size
+        if (fileSize <= 2 * 1024) {
+            return next(new BadRequestError('Файл слишком маленький'))
+        }
+        if (fileSize > 10 * 1024 * 1024) {
+            return next(new BadRequestError('Файл слишком большой'))
+        }
+
+
+        const originalName = path.basename(req.file.originalname)
+
+        const fileName =
+            `/${process.env.UPLOAD_PATH ?? ''}/${req.file.filename}`.replace(
+                /\/+/g,
+                '/'
+            )
+
+        return res.status(constants.HTTP_STATUS_CREATED).json({
             fileName,
-            originalName: req.file?.originalname,
+            originalName
         })
     } catch (error) {
         return next(error)

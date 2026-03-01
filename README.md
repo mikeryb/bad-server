@@ -13,4 +13,6 @@ docker compose up -d
 6. Админка находится по адресу http://localhost/admin/
 
 Ссылка на  github-repo:  https://github.com/mikeryb/bad-server
+Рыборецкий Михаил, когорта 39, Фулстек-разработчик
+
 

@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { NextFunction, Request, Response } from 'express'
+import sanitizeHtml from 'sanitize-html'
 import { constants } from 'http2'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { Error as MongooseError } from 'mongoose'
@@ -9,6 +10,7 @@ import ConflictError from '../errors/conflict-error'
 import NotFoundError from '../errors/not-found-error'
 import UnauthorizedError from '../errors/unauthorized-error'
 import User from '../models/user'
+
 
 // POST /auth/login
 const login = async (req: Request, res: Response, next: NextFunction) => {
@@ -36,7 +38,11 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 const register = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password, name } = req.body
-        const newUser = new User({ email, password, name })
+        const safeName = sanitizeHtml(name, {
+            allowedTags: [],
+            allowedAttributes: {},
+        })
+        const newUser = new User({ email, password, name: safeName })
         await newUser.save()
         const accessToken = newUser.generateAccessToken()
         const refreshToken = await newUser.generateRefreshToken()
@@ -191,8 +197,29 @@ const updateCurrentUser = async (
     next: NextFunction
 ) => {
     const userId = res.locals.user._id
+    const safeUpdates = {
+        ...req.body,
+        name: req.body.name
+            ? sanitizeHtml(req.body.name, {
+                  allowedTags: [],
+                  allowedAttributes: {},
+              })
+            : undefined,
+        bio: req.body.bio
+            ? sanitizeHtml(req.body.bio, {
+                  allowedTags: [],
+                  allowedAttributes: {},
+              })
+            : undefined,
+        comment: req.body.comment
+            ? sanitizeHtml(req.body.comment, {
+                  allowedTags: [],
+                  allowedAttributes: {},
+              })
+            : undefined,
+    }
     try {
-        const updatedUser = await User.findByIdAndUpdate(userId, req.body, {
+        const updatedUser = await User.findByIdAndUpdate(userId, safeUpdates, {
             new: true,
         }).orFail(
             () =>

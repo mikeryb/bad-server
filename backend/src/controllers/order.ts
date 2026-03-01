@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from 'express'
 import { FilterQuery, Error as MongooseError, Types } from 'mongoose'
+import sanitizeHtml from 'sanitize-html';
 import BadRequestError from '../errors/bad-request-error'
 import NotFoundError from '../errors/not-found-error'
-import Order, { IOrder } from '../models/order'
+import Order, { IOrder, StatusType } from '../models/order'
 import Product, { IProduct } from '../models/product'
 import User from '../models/user'
+
 
 // eslint-disable-next-line max-len
 // GET /orders?page=2&limit=5&sort=totalAmount&order=desc&orderDateFrom=2024-07-01&orderDateTo=2024-08-01&status=delivering&totalAmountFrom=100&totalAmountTo=1000&search=%2B1
@@ -30,9 +32,11 @@ export const getOrders = async (
 
         const filters: FilterQuery<Partial<IOrder>> = {}
 
+        const allowedStatuses = Object.values(StatusType)
+
         if (status) {
-            if (typeof status === 'object') {
-                Object.assign(filters, status)
+            if (status && !allowedStatuses.includes(status as StatusType)) {
+                throw new BadRequestError('Invalid status')
             }
             if (typeof status === 'string') {
                 filters.status = status
@@ -90,7 +94,11 @@ export const getOrders = async (
         ]
 
         if (search) {
-            const searchRegex = new RegExp(search as string, 'i')
+            const safeSearch = String(search).replace(
+                /[.*+?^${}()|[\]\\]/g,
+                '\\$&'
+            )
+            const searchRegex = new RegExp(safeSearch, 'i')
             const searchNumber = Number(search)
 
             const searchConditions: any[] = [{ 'products.title': searchRegex }]
@@ -110,14 +118,30 @@ export const getOrders = async (
 
         const sort: { [key: string]: any } = {}
 
-        if (sortField && sortOrder) {
+        const allowedSortFields = [
+            'createdAt',
+            'totalAmount',
+            'status',
+            'orderNumber',
+        ]
+
+        if (
+            sortField &&
+            sortOrder &&
+            allowedSortFields.includes(String(sortField))
+        ) {
             sort[sortField as string] = sortOrder === 'desc' ? -1 : 1
+        } else {
+            sort.createdAt = -1
         }
+
+        const pageNum = Math.max(1, Number(page) || 1)
+        const limitNum = Math.min(10, Math.max(1, Number(limit) || 10))
 
         aggregatePipeline.push(
             { $sort: sort },
-            { $skip: (Number(page) - 1) * Number(limit) },
-            { $limit: Number(limit) },
+            { $skip: (pageNum - 1) * limitNum },
+            { $limit: limitNum },
             {
                 $group: {
                     _id: '$_id',
@@ -140,8 +164,8 @@ export const getOrders = async (
             pagination: {
                 totalOrders,
                 totalPages,
-                currentPage: Number(page),
-                pageSize: Number(limit),
+                currentPage: pageNum,
+                pageSize: limitNum,
             },
         })
     } catch (error) {
@@ -185,7 +209,11 @@ export const getOrdersCurrentUser = async (
 
         if (search) {
             // если не экранировать то получаем Invalid regular expression: /+1/i: Nothing to repeat
-            const searchRegex = new RegExp(search as string, 'i')
+            const safeSearch = String(search).replace(
+                /[.*+?^${}()|[\]\\]/g,
+                '\\$&'
+            )
+            const searchRegex = new RegExp(safeSearch, 'i')
             const searchNumber = Number(search)
             const products = await Product.find({ title: searchRegex })
             const productIds = products.map((product) => product._id)
@@ -309,15 +337,38 @@ export const createOrder = async (
             return next(new BadRequestError('Неверная сумма заказа'))
         }
 
+        const safeComment = sanitizeHtml(comment || '', {
+            allowedTags: [],
+            allowedAttributes: {},
+        })
+
+        const safeAddress = sanitizeHtml(address || '', {
+            allowedTags: [],
+            allowedAttributes: {},
+        })
+        const safeEmail = sanitizeHtml(email || '', {
+            allowedTags: [],
+            allowedAttributes: {},
+        })       
+
+        if (phone.length > 20) {
+            return next(new BadRequestError('номер телефона не может быть длиннее 20 символов'))
+        }
+
+        const safePhone = sanitizeHtml(phone || '', {
+            allowedTags: [],
+            allowedAttributes: {},
+        })
+
         const newOrder = new Order({
             totalAmount: total,
             products: items,
             payment,
-            phone,
-            email,
-            comment,
+            phone: safePhone,
+            email: safeEmail,
+            comment: safeComment,
             customer: userId,
-            deliveryAddress: address,
+            deliveryAddress: safeAddress,
         })
         const populateOrder = await newOrder.populate(['customer', 'products'])
         await populateOrder.save()

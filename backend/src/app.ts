@@ -1,5 +1,6 @@
 import { errors } from 'celebrate'
 import cookieParser from 'cookie-parser'
+import rateLimit from 'express-rate-limit'
 import cors from 'cors'
 import 'dotenv/config'
 import express, { json, urlencoded } from 'express'
@@ -10,21 +11,32 @@ import errorHandler from './middlewares/error-handler'
 import serveStatic from './middlewares/serverStatic'
 import routes from './routes'
 
+
+
 const { PORT = 3000 } = process.env
 const app = express()
+const { ORIGIN_ALLOW } = process.env;
 
 app.use(cookieParser())
 
-app.use(cors())
-// app.use(cors({ origin: ORIGIN_ALLOW, credentials: true }));
+// app.use(cors())
+app.use(cors({ origin: ORIGIN_ALLOW, credentials: true }));
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(serveStatic(path.join(__dirname, 'public')))
 
 app.use(urlencoded({ extended: true }))
-app.use(json())
+app.use(json({ limit: '100kb' }))
 
-app.options('*', cors())
+app.use(rateLimit({
+  windowMs: 60 * 1000,
+  max: 50,
+}))
+
+app.options('*', cors({
+  origin: ORIGIN_ALLOW,
+  credentials: true,
+}))
 app.use(routes)
 app.use(errors())
 app.use(errorHandler)
