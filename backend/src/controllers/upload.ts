@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { constants } from 'http2'
 import BadRequestError from '../errors/bad-request-error'
-import sanitizeHtml from 'sanitize-html'
 import sharp from 'sharp'
 import crypto from 'crypto'
 import path from 'path'
@@ -41,8 +40,8 @@ export const uploadFile = async (
             : `/${randomName}${ext}`
 
         return res.status(constants.HTTP_STATUS_CREATED).json({
-            fileName,
-            originalName: originalName,
+            fileName/* ,
+            originalName: originalName, */
         })
     } catch (error) {
         return next(error)
