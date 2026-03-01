@@ -16,7 +16,7 @@ export const uploadFile = async (
 
 
     try {
-        /* const fileSize = req.file.size
+        const fileSize = req.file.size
         if (fileSize <= 2 * 1024) {
             return next(new BadRequestError('Файл слишком маленький'))
         }
@@ -24,7 +24,7 @@ export const uploadFile = async (
             return next(new BadRequestError('Файл слишком большой'))
         }
 
-        try {
+       /*  try {
             await sharp(req.file.buffer).metadata()
         } catch {
             return next(new BadRequestError('Файл не является изображением'))
