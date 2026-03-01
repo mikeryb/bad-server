@@ -341,14 +341,14 @@ export const createOrder = async (
             allowedAttributes: {},
         })
 
-        /* const safeAddress = sanitizeHtml(address || '', {
+        const safeAddress = sanitizeHtml(address || '', {
             allowedTags: [],
             allowedAttributes: {},
         })
         const safeEmail = sanitizeHtml(email || '', {
             allowedTags: [],
             allowedAttributes: {},
-        })  */      
+        })       
 
         if (phone.length > 20) {
             return next(new BadRequestError('номер телефона не может быть длиннее 20 символов'))
