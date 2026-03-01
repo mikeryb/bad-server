@@ -10,9 +10,12 @@ export const uploadFile = async (
     res: Response,
     next: NextFunction
 ) => {
+    console.log('req.file:', req.file);
     if (!req.file) {
         return next(new BadRequestError('Файл не загружен'))
     }
+
+
 
     try {
         const fileSize = req.file.size
