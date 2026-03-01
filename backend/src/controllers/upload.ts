@@ -4,7 +4,6 @@ import BadRequestError from '../errors/bad-request-error'
 import sanitizeHtml from 'sanitize-html'
 import sharp from 'sharp'
 import crypto from 'crypto'
-import path from 'path'
 
 export const uploadFile = async (
     req: Request,
@@ -16,6 +15,7 @@ export const uploadFile = async (
     }
 
     try {
+
         const fileSize = req.file.size
         if (fileSize < 2 * 1024) {
             return next(new BadRequestError('Файл слишком маленький'))
@@ -30,14 +30,20 @@ export const uploadFile = async (
             return next(new BadRequestError('Файл не является изображением'))
         }
 
-        const ext = path.extname(req.file.originalname).toLowerCase()
-        const randomName = crypto.randomBytes(16).toString('hex') + ext
+        const safeOriginalName = sanitizeHtml(String(req.file.originalname).slice(0, 100), {
+            allowedTags: [],
+            allowedAttributes: {},
+        }).replace(/[^a-zA-Z0-9_\-\.]/g, '')
+        
+        const randomName = crypto.randomBytes(16).toString('hex')
 
-        const fileName = randomName
+        const fileName = process.env.UPLOAD_PATH
+            ? `/${process.env.UPLOAD_PATH}/${randomName}`
+            : `/${randomName}`
 
         return res.status(constants.HTTP_STATUS_CREATED).json({
             fileName,
-            originalName: randomName,
+            originalName: safeOriginalName,
         })
     } catch (error) {
         return next(error)
