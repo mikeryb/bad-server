@@ -103,7 +103,7 @@ export const getCustomers = async (
                     $or: [{ deliveryAddress: searchRegex }],
                 },
                 '_id'
-            )
+            ).limit(50)
 
             const orderIds = orders.map((order) => order._id)
 
