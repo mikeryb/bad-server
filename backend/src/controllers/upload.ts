@@ -30,12 +30,9 @@ export const uploadFile = async (
             return next(new BadRequestError('Файл не является изображением'))
         }
 
-        const safeOriginalName = sanitizeHtml(
-            String(req.file.originalname).slice(0, 100),
-            { allowedTags: [], allowedAttributes: {} }
-        ).replace(/[^a-zA-Z0-9_\-\.]/g, '')
+        const originalName = path.basename(req.file.originalname);
 
-        const ext = path.extname(safeOriginalName).toLowerCase()
+        const ext = path.extname(originalName).toLowerCase()
 
         const randomName = crypto.randomBytes(16).toString('hex')
 
@@ -45,7 +42,7 @@ export const uploadFile = async (
 
         return res.status(constants.HTTP_STATUS_CREATED).json({
             fileName,
-            originalName: safeOriginalName,
+            originalName: originalName,
         })
     } catch (error) {
         return next(error)
