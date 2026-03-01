@@ -365,10 +365,10 @@ export const createOrder = async (
             products: items,
             payment,
             phone: safePhone,
-            email: email,
+            email: safeEmail,
             comment: safeComment,
             customer: userId,
-            deliveryAddress: address,
+            deliveryAddress: safeAddress,
         })
         const populateOrder = await newOrder.populate(['customer', 'products'])
         await populateOrder.save()

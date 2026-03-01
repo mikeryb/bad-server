@@ -1,3 +1,4 @@
+import csrf from 'csurf'
 import { Router } from 'express'
 import {
     deleteCustomer,
@@ -6,7 +7,7 @@ import {
     updateCustomer,
 } from '../controllers/customers'
 import auth from '../middlewares/auth'
-import csrf from 'csurf'
+
 
 const csrfProtection = csrf({ cookie: true })
 

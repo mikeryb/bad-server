@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
+import sanitizeHtml from 'sanitize-html';
 import { constants } from 'http2'
 import { Error as MongooseError } from 'mongoose'
 import { join } from 'path'
@@ -7,7 +8,7 @@ import ConflictError from '../errors/conflict-error'
 import NotFoundError from '../errors/not-found-error'
 import Product, { IProduct } from '../models/product'
 import movingFile from '../utils/movingFile'
-import sanitizeHtml from 'sanitize-html';
+
 
 // GET /product
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
@@ -59,7 +60,7 @@ const createProduct = async (
             allowedAttributes: {},
         })
         const safePrice = Number(price)
-        if (isNaN(safePrice) || safePrice < 0) {
+        if (Number.isNaN(safePrice) || safePrice < 0) {
             throw new BadRequestError('Неверное значение price')
         }
 
@@ -125,7 +126,7 @@ const updateProduct = async (
 
         if (price !== undefined) {
             const safePrice = Number(price)
-            if (isNaN(safePrice) || safePrice < 0)
+            if (Number.isNaN(safePrice) || safePrice < 0)
                 throw new BadRequestError('Неверное значение price')
             updateData.price = safePrice
         }

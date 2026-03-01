@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import { constants } from 'http2'
-import BadRequestError from '../errors/bad-request-error'
 import sharp from 'sharp'
 import path from 'path'
+import BadRequestError from '../errors/bad-request-error'
 
 export const uploadFile = async (
     req: Request,
@@ -24,11 +24,6 @@ export const uploadFile = async (
             return next(new BadRequestError('Файл слишком большой'))
         }
 
-        try {
-            await sharp(req.file.buffer).metadata()
-        } catch {
-            return next(new BadRequestError('Файл не является изображением'))
-        }
 
         const originalName = path.basename(req.file.originalname)
 

@@ -1,3 +1,4 @@
+import csrf from 'csurf'
 import { Router } from 'express'
 import {
     createProduct,
@@ -12,7 +13,7 @@ import {
     validateProductUpdateBody,
 } from '../middlewares/validations'
 import { Role } from '../models/user'
-import csrf from 'csurf'
+
 
 const csrfProtection = csrf({ cookie: true })
 

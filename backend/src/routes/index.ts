@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import NotFoundError from '../errors/not-found-error'
-import { roleGuardMiddleware } from '../middlewares/auth'
-
-import auth from '../middlewares/auth'
+import auth, { roleGuardMiddleware } from '../middlewares/auth'
 import authRouter from './auth'
 import customerRouter from './customers'
 import orderRouter from './order'
