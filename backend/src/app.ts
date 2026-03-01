@@ -25,11 +25,11 @@ app.use(cors({ origin: ORIGIN_ALLOW, credentials: true }));
 app.use(serveStatic(path.join(__dirname, 'public')))
 
 app.use(urlencoded({ extended: true }))
-app.use(json({ limit: '2kb' }))
+app.use(json({ limit: '10kb' }))
 
 app.use(rateLimit({
   windowMs: 60 * 1000,
-  max: 10,
+  max: 20,
 }))
 
 app.options('*', cors({
