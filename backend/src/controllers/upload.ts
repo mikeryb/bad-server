@@ -29,19 +29,17 @@ export const uploadFile = async (
             return next(new BadRequestError('Файл не является изображением'))
         }
 
-        const originalName = path.basename(req.file.originalname);
+        const originalName = path.basename(req.file.originalname)
 
-        const ext = path.extname(originalName).toLowerCase()
-
-        const randomName = crypto.randomBytes(16).toString('hex')
-
-        const fileName = process.env.UPLOAD_PATH
-            ? `/${process.env.UPLOAD_PATH}/${randomName}${ext}`
-            : `/${randomName}${ext}`
+        const fileName =
+            `/${process.env.UPLOAD_PATH ?? ''}/${req.file.filename}`.replace(
+                /\/+/g,
+                '/'
+            )
 
         return res.status(constants.HTTP_STATUS_CREATED).json({
             fileName,
-            originalName: originalName,
+            originalName
         })
     } catch (error) {
         return next(error)
