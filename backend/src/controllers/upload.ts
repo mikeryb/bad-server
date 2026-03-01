@@ -12,6 +12,8 @@ export const uploadFile = async (
         return next(new BadRequestError('Файл не загружен'))
     }
 
+
+
     try {
         const fileSize = req.file.size
         if (fileSize <= 2 * 1024) {
@@ -19,10 +21,6 @@ export const uploadFile = async (
         }
         if (fileSize > 10 * 1024 * 1024) {
             return next(new BadRequestError('Файл слишком большой'))
-        }
-
-        if (!req.file.mimetype.startsWith('image/')) {
-            return next(new BadRequestError('Файл не является изображением'))
         }
 
         const originalName = path.basename(req.file.originalname)
@@ -35,7 +33,7 @@ export const uploadFile = async (
 
         return res.status(constants.HTTP_STATUS_CREATED).json({
             fileName,
-            originalName,
+            originalName
         })
     } catch (error) {
         return next(error)
