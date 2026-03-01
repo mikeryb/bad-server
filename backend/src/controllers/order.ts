@@ -351,7 +351,7 @@ export const createOrder = async (
         })  */      
 
         if (phone.length > 20) {
-            return next(new BadRequestError('не'))
+            return next(new BadRequestError('номер телефона не может быть длиннее 20 символов'))
         }
 
         const safePhone = sanitizeHtml(phone || '', {
